@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ResultActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="15sp"
+        android:paddingEnd="15sp"
+        android:paddingTop="15sp"
+        android:paddingBottom="15sp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/Status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: "/>
+
+        <TextView
+            android:id="@+id/RemID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RemID: "/>
+
+        <TextView
+            android:id="@+id/Amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Amount: "/>
+
+        <TextView
+            android:id="@+id/CartId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cart Id: "/>
+
+        <TextView
+            android:id="@+id/CardType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Card type: "/>
+
+        <TextView
+            android:id="@+id/Message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message: "/>
+
+        <TextView
+            android:id="@+id/ApplicationId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ApplicationId: "/>
+
+        <TextView
+            android:id="@+id/AuthIDResponse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AuthIDResponse: "/>
+
+        <TextView
+            android:id="@+id/ResponseOrderNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ResponseOrderNumber: "/>
+
+        <TextView
+            android:id="@+id/CardNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CardNo: "/>
+
+        <TextView
+            android:id="@+id/CompanyRemID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CompanyRemID: "/>
+
+        <TextView
+            android:id="@+id/MID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MID: "/>
+
+        <TextView
+            android:id="@+id/TID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TID: "/>
+
+        <TextView
+            android:id="@+id/TVR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TVR: "/>
+
+        <TextView
+            android:id="@+id/TxType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TxType: "/>
+
+        <TextView
+            android:id="@+id/Method"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Method: "/>
+
+        <TextView
+            android:id="@+id/TraceNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TraceNo: "/>
+
+        <TextView
+            android:id="@+id/SettlementBatchNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SettlementBatchNumber: "/>
+        <TextView
+            android:id="@+id/TransferDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TransferDate: "/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/doneBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Done"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
