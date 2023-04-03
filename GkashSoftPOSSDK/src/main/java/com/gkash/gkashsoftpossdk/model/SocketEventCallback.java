@@ -1,22 +1,24 @@
 package com.gkash.gkashsoftpossdk.model;
 
-public class SocketEventCallback {
-    public int type;
-    public int eventIndex;
+import com.gkash.gkashsoftpossdk.GkashSoftPOSSDK;
 
-    public int getType() {
+public class SocketEventCallback {
+    public GkashSoftPOSSDK.TransactionCallbackType type;
+    public GkashSoftPOSSDK.TransactionEventCallback eventIndex;
+
+    public GkashSoftPOSSDK.TransactionCallbackType getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(GkashSoftPOSSDK.TransactionCallbackType type) {
         this.type = type;
     }
 
-    public int getEventIndex() {
+    public GkashSoftPOSSDK.TransactionEventCallback getEventIndex() {
         return eventIndex;
     }
 
-    public void setEventIndex(int eventIndex) {
+    public void setEventIndex(GkashSoftPOSSDK.TransactionEventCallback eventIndex) {
         this.eventIndex = eventIndex;
     }
 }

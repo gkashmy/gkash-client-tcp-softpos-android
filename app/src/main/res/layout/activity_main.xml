@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:ignore="HardcodedText,LabelFor,Autofill,ButtonStyle"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -11,9 +12,16 @@
         android:layout_height="match_parent"
         android:paddingTop="10sp"
         android:paddingBottom="10sp"
-        android:paddingStart="20sp"
-        android:paddingEnd="20sp"
+        android:paddingStart="15sp"
+        android:paddingEnd="15sp"
         android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/ipAddressTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IP Address: -"/>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,7 +30,7 @@
 
             <TextView
                 android:id="@+id/socketStatus"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Offline"/>
@@ -36,20 +44,270 @@
         </LinearLayout>
 
         <EditText
-            android:id="@+id/amount"
+            android:id="@+id/amountET"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autofillHints="amount"
-            android:text="0.10"
+            android:text="1.00"
             android:inputType="numberDecimal" />
 
-        <Button
-            android:id="@+id/paymentBtn"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Request payment" />
+            android:weightSum="2"
+            android:orientation="horizontal">
 
+            <EditText
+                android:id="@+id/emailET"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:text="test@gkash.com"
+                android:inputType="textEmailAddress" />
+
+            <EditText
+                android:id="@+id/mobileNoET"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Mobile number"
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:text="0123456789"
+                android:inputType="number" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="2"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/referenceNoET"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Reference number"
+                android:textSize="16sp"
+                android:text=""
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/paymentTypeET"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="PaymentType"
+                android:enabled="false"
+                android:text=""
+                android:textSize="16sp"
+                android:inputType="text" />
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="2"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/queryBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="1dp"
+            android:textSize="11sp"
+            android:enabled="false"
+            android:text="Query status" />
+
+        <CheckBox
+            android:id="@+id/envCB"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="1dp"
+            android:textSize="11sp"
+            android:checked="true"
+            android:enabled="false"
+            android:text="Testing environment?" />
 
     </LinearLayout>
 
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose payment type"
+            android:textStyle="bold"
+            android:textSize="18sp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/tapBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="Tap-to-\nPhone" />
+
+            <Button
+                android:id="@+id/cardBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="Card with\nTerminal"/>
+
+            <Button
+                android:id="@+id/scanBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="E-Wallet Scan" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/duitNowBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="DuitNow\nQR" />
+
+            <Button
+                android:id="@+id/maybankBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:layout_margin="1dp"
+                android:text="Maybank\nQR" />
+
+            <Button
+                android:id="@+id/boostBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_margin="1dp"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:text="Boost\nQR"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/tngBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="TnG\nQR" />
+
+            <Button
+                android:id="@+id/grabPayBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="GrabPay\nQR" />
+
+            <Button
+                android:id="@+id/mcashBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:text="MCash\nQR"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/shopeeBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="ShopeePay\nQR" />
+
+            <Button
+                android:id="@+id/atomeBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="Atome\nQR" />
+
+            <Button
+                android:id="@+id/aliPayBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:text="Alipay\nQR"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/wechatBtn"
+                android:layout_width="0sp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:textSize="11sp"
+                android:text="Wechat\nQR" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/paymentBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="12dp"
+        android:text="Request payment" />
 </androidx.constraintlayout.widget.ConstraintLayout>

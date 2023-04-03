@@ -10,8 +10,6 @@ import com.gkash.gkashsoftpossdk.model.SocketEventCallback;
 import com.gkash.gkashsoftpossdk.model.GkashSDKStatus;
 import com.gkash.gkashsoftpossdk.model.TransactionDetails;
 import com.gkash.gkashsoftpossdk.model.TransactionResult;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -25,9 +23,8 @@ import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -40,20 +37,17 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class GkashSocketThread extends Thread {
 
-    private Socket socket;
-    private BufferedReader reader;
-    private GkashSoftPOSSDK mSDK;
     private static final int SERVER_PORT = 38300;
-    private final static String SERVER_HOST = "192.168.0.138";
     private static final String pfxPassword = "9pcTOBjq";
-    private PaymentRequestDto requestDto;
+    private final PaymentRequestDto requestDto;
     private boolean running = true;
-    private OutputStream outputStream;
     private final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
     private final String logEvent = "GkashSDKThread";
     private final Handler handler = new Handler();
     private Boolean queryingStatus = false;
-    private GkashSDKStatus mGkashSDKStatus;
+    private final GkashSDKStatus mGkashSDKStatus;
+    private final GkashSoftPOSSDK mSdk;
+    private int _pingCount = 0;
     private final Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -66,11 +60,32 @@ public class GkashSocketThread extends Thread {
             }
         }
     };
+    private final Handler checkInternetHandler = new Handler();
+    private final Runnable checkInternetRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(logEvent, "run checkInternet");
+            boolean isActive =  checkInternet();
+            Log.d(logEvent, "internet: " + isActive);
+            if(!isActive){
+                checkInternetHandler.postDelayed(this, 2000);
+            }else{
+                checkInternetHandler.removeCallbacks(this);
+                Log.d(logEvent, "try reconnect");
+                reconnect();
+                return;
+            }
 
+            if(_pingCount > 10){
+                checkInternetHandler.removeCallbacks(this);
+            }
+        }
+    };
 
     public GkashSocketThread (PaymentRequestDto dto, GkashSDKStatus gkashSDKStatus){
         this.requestDto = dto;
         this.mGkashSDKStatus = gkashSDKStatus;
+        this.mSdk = GkashSoftPOSSDK.getInstance();
         Log.d(logEvent, "GkashSocketThread");
     }
 
@@ -78,13 +93,11 @@ public class GkashSocketThread extends Thread {
     public void run() {
         try {
             Log.d(logEvent, "GkashSocketThread run");
-            mSDK = GkashSoftPOSSDK.getInstance(null);
             File root = Environment.getExternalStorageDirectory();
-            String fileName = "t1clientcert.pfx";
+
+            String serverHost = mSdk.getIpAddress();
             // Construct the path to the folder and file
-            File folder = new File(root, "GkashSDKCert");
-            File file = new File(folder, fileName);
-            String path = file.getPath();
+            String path = root + mSdk.getCertPath();
             // Load the TLS certificate from the file
             FileInputStream certInputStream = new FileInputStream(path);
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
@@ -106,26 +119,13 @@ public class GkashSocketThread extends Thread {
 
             // Connect to the server using the SSLContext
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-            socket = sslSocketFactory.createSocket(SERVER_HOST, SERVER_PORT);
+            Socket socket = sslSocketFactory.createSocket(serverHost, SERVER_PORT);
 
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            outputStream = socket.getOutputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            OutputStream outputStream = socket.getOutputStream();
 
             Log.d(logEvent, "connected");
             mGkashSDKStatus.setSocketStatus(GkashSoftPOSSDK.SocketConnectivityCallback.CONNECTED);
-
-            List<String> listToHash = new ArrayList<>();
-            listToHash.add("Daf1CrgnYPIz026");
-            listToHash.add(requestDto.Amount.replace(".", ""));
-            listToHash.add(requestDto.Email);
-            listToHash.add(requestDto.ReferenceNo);
-            listToHash.add(requestDto.MobileNo);
-            listToHash.add(String.valueOf(requestDto.PaymentType.ordinal()));
-            listToHash.add(Boolean.toString(requestDto.PreAuth));
-            requestDto.Signature = getSha512Hash(listToHash);
-            String requestString = toJsonString(requestDto);
-            mGkashSDKStatus.setTransactionType(requestDto.PaymentType);
-            sendMessage(requestString);
 
             // Start the message loop
             while (running) {
@@ -144,12 +144,9 @@ public class GkashSocketThread extends Thread {
                         message = messageBuilder.toString();
                         Log.d(logEvent, "Received data[0]: " + message);
                         if(message.contains("<EOF>")){
+                            message = message.replace("<EOF>", "");
                             break;
                         }
-                    }
-
-                    if(message.contains("<EOF>")){
-                        message = message.replace("<EOF>", "");
                     }
 
                     Log.d(logEvent, "Received data: " + message);
@@ -157,36 +154,39 @@ public class GkashSocketThread extends Thread {
                         // do something with the message
                         JSONObject jsonObject = new JSONObject(message);
                         SocketEventCallback callback = new SocketEventCallback();
-                        callback.setType(jsonObject.getInt("type"));
 
-                        if(callback.getType() == GkashSoftPOSSDK.TransactionCallbackType.TRANSACTION_STATUS.ordinal()){
-                            callback.setEventIndex(jsonObject.getInt("eventIndex"));
+                        int type =  jsonObject.getInt("type");
+                        callback.setType(GkashSoftPOSSDK.TransactionCallbackType.values()[type]);
+
+                        if(callback.getType() == GkashSoftPOSSDK.TransactionCallbackType.TRANSACTION_STATUS){
+
+                            int eventIndex =  jsonObject.getInt("eventIndex");
+                            callback.setEventIndex(GkashSoftPOSSDK.TransactionEventCallback.values()[eventIndex]);
+
                             Log.d(logEvent, GkashSoftPOSSDK.TransactionCallbackType.TRANSACTION_STATUS.name());
+                            Log.d(logEvent, callback.getEventIndex().name());
 
-                            Log.d(logEvent, GkashSoftPOSSDK.TransactionEventCallback.values()[callback.getEventIndex()].name());
+                            mGkashSDKStatus.setTransactionEventCallback(callback.getEventIndex());
 
-                            if(callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.INIT_PAYMENT.ordinal()){
-                                if(!queryingStatus){
-                                    queryingStatus = true;
-                                    Log.d(logEvent, "Init query status");
-                                    handler.postDelayed(runnable, 2000);
-                                }
-                            }else if(callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.CANCEL_PAYMENT.ordinal()){
-                                if(queryingStatus){
-                                    Log.d(logEvent, "cancel query");
-                                    queryingStatus = false;
-                                    handler.removeCallbacks(runnable);
-                                }
+                            if(callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.INIT_PAYMENT){
+                                startQuery();
+                            }else if(callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.CANCEL_PAYMENT ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.DONE ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.INVALID_METHOD ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.CHECK_TERMINAL_STATUS ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.NO_CARD_DETECTED_TIMEOUT ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.GET_KEY_FAIL ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.INVALID_SIGNATURE ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.DEVICE_OFFLINE ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.INVALID_AMOUNT){
+
+                                stopQuery();
                                 stopRunning();
-                                mGkashSDKStatus.setTransactionEventCallback(GkashSoftPOSSDK.TransactionEventCallback.CANCEL_PAYMENT);
+                                mGkashSDKStatus.setTransactionEventCallback(callback.getEventIndex());
                             }
-                        }else if (callback.getType() == GkashSoftPOSSDK.TransactionCallbackType.TRANSACTION_RESULT.ordinal()){
+                        }else if (callback.getType() == GkashSoftPOSSDK.TransactionCallbackType.TRANSACTION_RESULT){
                             Log.d(logEvent, GkashSoftPOSSDK.TransactionCallbackType.TRANSACTION_RESULT.name());
-                            if(queryingStatus){
-                                Log.d(logEvent, "cancel query");
-                                queryingStatus = false;
-                                handler.removeCallbacks(runnable);
-                            }
+                            stopQuery();
 
                             JSONObject resultObj = new JSONObject(message);
                             TransactionResult result = new TransactionResult();
@@ -219,7 +219,7 @@ public class GkashSocketThread extends Thread {
 
                             result.setResult(transactionDetails);
 
-                            mSDK.SendTransactionResult(transactionDetails);
+                            mSdk.SendTransactionResult(transactionDetails);
                             stopRunning();
                         }
                     }
@@ -236,14 +236,21 @@ public class GkashSocketThread extends Thread {
             Log.d(logEvent, "reader close");
             socket.close();
             Log.d(logEvent, "socket close");
-            if(queryingStatus){
-                queryingStatus = false;
-                handler.removeCallbacks(runnable);
-                Log.d(logEvent, "queryingStatus false");
-            }
+            stopQuery();
         } catch (Exception e) {
-            Log.d(logEvent, "Exception: " + e.getMessage());
-            e.printStackTrace();
+            Log.d(logEvent, "Run Exception: " + e.getMessage());
+            Log.d(logEvent, e.getMessage());
+
+            stopQuery();
+            stopRunning();
+
+            String errorMessage = e.getMessage();
+            if(errorMessage != null && errorMessage.contains("Permission denied")){
+                mGkashSDKStatus.setSocketStatus(GkashSoftPOSSDK.SocketConnectivityCallback.AUTH_ERROR);
+                return;
+            }
+
+            startCheckInternet();
         }
     }
 
@@ -273,39 +280,100 @@ public class GkashSocketThread extends Thread {
         return hash;
     }
 
-    public static String toJsonString(Object obj) {
-        JSONObject jsonObject = new JSONObject();
-
-        try {
-            // Get all fields of the class
-            java.lang.reflect.Field[] fields = obj.getClass().getDeclaredFields();
-            for (java.lang.reflect.Field field : fields) {
-                // Make fields accessible to get their values
-                field.setAccessible(true);
-                // Add field name and value to JSONObject
-                Object value = field.get(obj);
-                if(field.getName().equals("PaymentType")){
-                    GkashSoftPOSSDK.PaymentType type = (GkashSoftPOSSDK.PaymentType) field.get(obj);
-                    value = type != null ? type.ordinal() : 0;
-                }
-
-                jsonObject.put(field.getName(), value);
-            }
-        } catch (IllegalAccessException | JSONException e) {
-            e.printStackTrace();
+    public void startQuery(){
+        if(!queryingStatus){
+            queryingStatus = true;
+            Log.d(logEvent, "Init query status");
+            handler.postDelayed(runnable, 2000);
         }
-
-        return jsonObject.toString();
     }
 
-    public void sendMessage(String jsonString) {
+    private void stopQuery(){
+        Log.d(logEvent, "stopQuery");
+        if(queryingStatus){
+            queryingStatus = false;
+            handler.removeCallbacks(runnable);
+            Log.d(logEvent, "queryingStatus false");
+        }
+    }
+
+    public void sendPaymentRequest(){
+        List<String> listToHash = new ArrayList<>();
+        listToHash.add(mSdk.getSignatureKey());
+        listToHash.add(requestDto.getAmount().replace(".", ""));
+        listToHash.add(requestDto.getEmail());
+        listToHash.add(requestDto.getReferenceNo());
+        listToHash.add(requestDto.getMobileNo());
+        listToHash.add(String.valueOf(requestDto.getPaymentType().ordinal()));
+        listToHash.add(Boolean.toString(requestDto.isPreAuth()));
+        requestDto.setSignature(getSha512Hash(listToHash));
+        String requestString = mSdk.toJsonString(requestDto);
+        mGkashSDKStatus.setTransactionType(requestDto.getPaymentType());
+        sendMessage(requestString);
+    }
+
+    private void sendMessage(String jsonString) {
         // Add the message to the queue
         messageQueue.add(jsonString);
     }
 
-    public void stopRunning() {
+    private void stopRunning() {
         Log.d(logEvent, "stopRunning");
         mGkashSDKStatus.setSocketStatus(GkashSoftPOSSDK.SocketConnectivityCallback.DISCONNECTED);
         running = false;
+    }
+
+    private void reconnect(){
+        Log.d(logEvent, "reconnect");
+        mGkashSDKStatus.setSocketStatus(GkashSoftPOSSDK.SocketConnectivityCallback.RECONNECTING);
+        if(running){
+            stopRunning();
+        }
+
+        this.interrupt();
+        mSdk.rerunSocket();
+    }
+
+    private void startCheckInternet(){
+        Log.d(logEvent, "startCheckInternet");
+        checkInternetHandler.postDelayed(checkInternetRunnable, 2000);
+    }
+
+    private boolean checkInternet(){
+        try {
+            _pingCount ++;
+            String pingGoogleDNS = "ping -c 1 8.8.8.8";
+            String pingHost = "ping -c 1 " + mSdk.getIpAddress();
+
+            boolean pingHostSuccess = (Runtime.getRuntime().exec(pingHost).waitFor() == 0);
+            boolean pingGoogleSuccess = (Runtime.getRuntime().exec(pingGoogleDNS).waitFor() == 0);
+            Log.d(logEvent, "pingHost: " + mSdk.getIpAddress() + " " + pingHostSuccess);
+            Log.d(logEvent, "pingGoogle: " + pingGoogleSuccess);
+            //Ping host successful, ready to reconnect
+            if(pingHostSuccess){
+                _pingCount = 0;
+                return true;
+            }else{
+                //Ping host unsuccessful but have active internet, update IpAddress and ping
+                if(pingGoogleSuccess){
+                    if(_pingCount > 10){
+                        Log.d(logEvent, "unable to ping host and google");
+                    }
+                    mSdk.retrieveIpAddress();
+                }else{
+                    //stop ping and return try again status to client
+                    if(_pingCount > 10){
+                        Log.d(logEvent, "unable to ping host and google");
+                        mGkashSDKStatus.setSocketStatus(GkashSoftPOSSDK.SocketConnectivityCallback.DISCONNECTED);
+                        mGkashSDKStatus.setTransactionEventCallback(GkashSoftPOSSDK.TransactionEventCallback.TRY_AGAIN);
+                    }
+                }
+                return false;
+            }
+        } catch (Exception e) {
+            mGkashSDKStatus.setSocketStatus(GkashSoftPOSSDK.SocketConnectivityCallback.DISCONNECTED);
+            mGkashSDKStatus.setTransactionEventCallback(GkashSoftPOSSDK.TransactionEventCallback.TRY_AGAIN);
+            return false;
+        }
     }
 }
