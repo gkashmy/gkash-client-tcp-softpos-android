@@ -2,6 +2,26 @@ plugins {
     id 'com.android.library'
 }
 
+ext {
+    PUBLISH_GROUP_ID = 'io.github.gkashmy'
+    PUBLISH_VERSION = '2.0.1'
+    PUBLISH_ARTIFACT_ID = 'gkash-softpos-sdk'
+    PUBLISH_DESCRIPTION = 'Gkash softPOS Android SDK'
+    PUBLISH_URL = 'https://github.com/gkashmy/gkash-softpos-sdk'
+    PUBLISH_LICENSE_NAME = 'The Apache Software License, Version 2.0'
+    PUBLISH_LICENSE_URL =
+            'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    PUBLISH_DEVELOPER_ID = 'gkash'
+    PUBLISH_DEVELOPER_NAME = 'gkash developer'
+    PUBLISH_DEVELOPER_EMAIL = 'developers@gkash.com'
+    PUBLISH_SCM_CONNECTION =
+            'scm:git:github.com/gkashmy/gkash-softpos-sdk.git'
+    PUBLISH_SCM_DEVELOPER_CONNECTION =
+            'scm:git:ssh://github.com/gkashmy/gkash-softpos-sdk.git'
+    PUBLISH_SCM_URL =
+            'https://github.com/gkashmy/gkash-softpos-sdk/tree/master'
+}
+
 android {
     namespace 'com.gkash.gkashsoftpossdk'
     compileSdk 33
@@ -34,3 +54,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
+
+apply from: "C:\\MyGit\\AndroidStudio\\GkashSDKdemo\\scripts\\publish-module.gradle"

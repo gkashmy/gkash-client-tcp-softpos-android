@@ -1,6 +1,12 @@
 package com.gkash.gkashsoftpossdk;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.gkash.gkashsoftpossdk.model.GkashSDKConfig;
 import com.gkash.gkashsoftpossdk.model.IpAddressDto;
@@ -13,8 +19,6 @@ import com.gkash.gkashsoftpossdk.service.GkashSocketThread;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.security.InvalidParameterException;
 
 
 public final class GkashSoftPOSSDK {
@@ -212,6 +216,12 @@ public final class GkashSoftPOSSDK {
         }
 
         return jsonObject.toString();
+    }
+
+    public void checkAndRequestPermission(Activity activity, int requestCode){
+        if (ContextCompat.checkSelfPermission(activity.getApplication().getApplicationContext() ,Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, requestCode);
+        }
     }
 
     public enum PaymentType

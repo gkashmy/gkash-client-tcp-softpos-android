@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:autofillHints="username"
             android:hint="Login username"
-            android:text="junesung@gkash.com"
+            android:text="M161-TD-4"
             android:inputType="text" />
 
         <EditText
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:autofillHints="password"
             android:hint="Password"
-            android:text="Abc.1234"
+            android:text="Abc@1234"
             android:inputType="textPassword" />
 
         <CheckBox

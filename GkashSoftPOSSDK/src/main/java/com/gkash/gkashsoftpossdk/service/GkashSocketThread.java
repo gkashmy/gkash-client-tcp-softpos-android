@@ -178,7 +178,8 @@ public class GkashSocketThread extends Thread {
                                      callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.GET_KEY_FAIL ||
                                      callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.INVALID_SIGNATURE ||
                                      callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.DEVICE_OFFLINE ||
-                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.INVALID_AMOUNT){
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.INVALID_AMOUNT ||
+                                     callback.getEventIndex() == GkashSoftPOSSDK.TransactionEventCallback.DEFAULT){
 
                                 stopQuery();
                                 stopRunning();
