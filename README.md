@@ -1,7 +1,6 @@
-# Gkash Payment SDK for Android
+# Gkash Payment SDK for Android (Offline payment)
 
-This library allows you to integrate Gkash Payment Gateway into your Android App.
-
+This library allows your android POS system communicate with SoftPOS by Gkash to make offline payment.
 
 ## Usage
 
