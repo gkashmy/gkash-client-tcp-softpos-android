@@ -1,9 +1,8 @@
-# Gkash Payment SDK for Android (Offline payment)
+# gkash-client-tcp-softpos-android (Offline payment)
 
-This library allows your android POS system communicate with SoftPOS by Gkash to make offline payment.
+This project serves as a sample that demonstrates how to communicate with the Gkash SoftPOS APP and perform offline payments.
 
 ## Usage
-
 Ensure jcenter is in the root level build.gradle file of an Android Project.
 
 ```Gradle
@@ -24,15 +23,20 @@ dependencies {
 
 Implement the library as follows. 
 
+SDK Initialization
+| GkashSDKConfig  | Description | Type |
+| --- | --- | --- |
+| setUsername | SoftPOS login username | string |
+| setPassword | SoftPOS login password | string |
+| setTestingEnvironment | Pass true to enable production environment, pass false for staging environment| boolean |
+| setCertPath | The path of the cert in your device | string |
+
 ```Java
 //Configure Config
 GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv).setCertPath("/GkashSDKCert/t1clientcert.pfx");
 
 //Get Gkash sdk current instance
 final GkashSoftPOSSDK gkashSoftPOSSDK = GkashSoftPOSSDK.getInstance();
-
-//Request permission
-gkashSoftPOSSDK.checkAndRequestPermission(MainActivity.this, 10001);
 
 //Initialize Gkash sdk
 gkashSoftPOSSDK.init(gkashSDKConfig, new GkashSoftPOSSDK.GkashStatusCallback() {
@@ -136,15 +140,15 @@ public void onClick(View view) {
     }
 });
 ```
-
-## Getting permission callback
-
-when requested for permission, implement TransStatusCallback to obtain the permission status.
-
+## To enable logging for investigate SDK error (Optional)
 ```Java
 //Request permission
 gkashSoftPOSSDK.checkAndRequestPermission(MainActivity.this, 10001);
+```
 
+After requested for permission, implement onRequestPermissionsResult to obtain the permission status.
+
+```Java
 @Override
 public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -159,6 +163,12 @@ public void onRequestPermissionsResult(int requestCode, @NonNull String[] permis
     }
 }
 ```
+
+## Setup Gkash Business settings
+
+Make sure to turn on Server mode in Gkash Business settings before initializing the SDK.
+
+![ss](https://github.com/gkashmy/gkash-client-tcp-softpos-windows/assets/72077476/039f3517-12db-468d-b800-aee0293a1361)
 
 ## License
 [Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)
