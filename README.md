@@ -19,8 +19,6 @@ dependencies {
      implementation 'io.github.gkashmy:gkash-softpos-sdk:2.0.1'
 }
 ```
-
-
 Implement the library as follows. 
 
 SDK Initialization
@@ -34,6 +32,9 @@ SDK Initialization
 ```Java
 //Configure Config
 GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv).setCertPath("/GkashSDKCert/t1clientcert.pfx");
+
+//Request permission for SDK to read the cert
+gkashSoftPOSSDK.checkAndRequestPermission(MainActivity.this, 10001);
 
 //Get Gkash sdk current instance
 final GkashSoftPOSSDK gkashSoftPOSSDK = GkashSoftPOSSDK.getInstance();
@@ -140,12 +141,6 @@ public void onClick(View view) {
     }
 });
 ```
-## To enable logging for investigate SDK error (Optional)
-```Java
-//Request permission
-gkashSoftPOSSDK.checkAndRequestPermission(MainActivity.this, 10001);
-```
-
 After requested for permission, implement onRequestPermissionsResult to obtain the permission status.
 
 ```Java
