@@ -1,10 +1,10 @@
 package com.gkash.gkashsdkdemo;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -17,12 +17,15 @@ import com.gkash.gkashsoftpossdk.model.GkashSDKConfig;
 import com.gkash.gkashsoftpossdk.model.PaymentRequestDto;
 import com.gkash.gkashsoftpossdk.model.TransactionDetails;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+    private GkashSoftPOSSDK gkashSoftPOSSDK;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +66,11 @@ public class MainActivity extends AppCompatActivity {
         envCb.setChecked(testingEnv);
 
         //Configure Config
-        GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv).setCertPath("/GkashSDKCert/t1clientcert.pfx");
+        GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv);
         //Get Gkash sdk current instance
-        final GkashSoftPOSSDK gkashSoftPOSSDK = GkashSoftPOSSDK.getInstance();
+        gkashSoftPOSSDK = GkashSoftPOSSDK.getInstance();
         //Request permission
-        gkashSoftPOSSDK.checkAndRequestPermission(MainActivity.this, 10001);
-
+        gkashSoftPOSSDK.importGkashCert(MainActivity.this, 10001);
         //Initialize Gkash sdk
         gkashSoftPOSSDK.init(gkashSDKConfig, new GkashSoftPOSSDK.GkashStatusCallback() {
             @Override
@@ -189,16 +191,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 10001) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted
-                // Do the operation that requires this permission
-            } else {
-                // Permission is not granted
-                // Display a message to the user explaining why the permission is needed
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+        if (requestCode == 10001 && resultCode == Activity.RESULT_OK) {
+            if (resultData != null) {
+                Uri uri = resultData.getData();
+                readPfxFile(uri);
             }
+        }
+    }
+
+    private void readPfxFile(Uri uri) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(uri);
+            gkashSoftPOSSDK.setGkashCertUri(uri, MainActivity.this);
+            if (inputStream != null) inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
