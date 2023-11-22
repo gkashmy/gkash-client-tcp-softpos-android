@@ -196,18 +196,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 10001 && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 Uri uri = resultData.getData();
-                readPfxFile(uri);
+                gkashSoftPOSSDK.setGkashCertUri(uri, MainActivity.this);
             }
-        }
-    }
-
-    private void readPfxFile(Uri uri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            gkashSoftPOSSDK.setGkashCertUri(uri, MainActivity.this);
-            if (inputStream != null) inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
