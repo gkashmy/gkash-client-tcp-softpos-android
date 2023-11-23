@@ -16,7 +16,7 @@ Include the library reference in the build.gradle file.
 
 ```Gradle
 dependencies {
-     implementation 'io.github.gkashmy:gkash-softpos-sdk:2.0.1'
+     implementation 'io.github.gkashmy:gkash-softpos-sdk:2.1.1'
 }
 ```
 Implement the library as follows. 
@@ -26,23 +26,27 @@ SDK Initialization
 | --- | --- | --- |
 | setUsername | SoftPOS login username | string |
 | setPassword | SoftPOS login password | string |
-| setTestingEnvironment | Pass true to enable production environment, pass false for staging environment| boolean |
-| setCertPath | The path of the cert in your device | string |
+| setTestingEnvironment | Pass true to enable production environment, pass false for staging environment | boolean |
+| setLoadCertFromAsset | To use the gkash pfx file from your project asset folder | boolean |
 
 ```Java
-//Configure Config
-GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv).setCertPath("/GkashSDKCert/t1clientcert.pfx");
-
-//Request permission for SDK to read the cert
-gkashSoftPOSSDK.checkAndRequestPermission(MainActivity.this, 10001);
-
 //Get Gkash sdk current instance
-final GkashSoftPOSSDK gkashSoftPOSSDK = GkashSoftPOSSDK.getInstance();
+gkashSoftPOSSDK = GkashSoftPOSSDK.getInstance(MainActivity.this);
+
+//Configure Config
+GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv);
+
+// To use the pfx file in your project, include the pfx file in the asset folder
+// GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv).setLoadCertFromAsset(true);
+
+// Do not need to call this if you setLoadCertFromAsset(true)
+// This function will navigate to your folder and choose the pfx file.
+gkashSoftPOSSDK.importGkashCert(MainActivity.this, 10001);
 
 //Initialize Gkash sdk
 gkashSoftPOSSDK.init(gkashSDKConfig, new GkashSoftPOSSDK.GkashStatusCallback() {
-@Override
-public void TransactionResult(TransactionDetails details) {
+    @Override
+    public void TransactionResult(TransactionDetails details) {
         //Handle transaction result
         Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
         intent.putExtra("Status", details.getStatus());
@@ -65,26 +69,26 @@ public void TransactionResult(TransactionDetails details) {
         intent.putExtra("TxType", details.getTxType());
         intent.putExtra("CartId", details.getCartID());
         startActivity(intent);
-        }
+    }
 
-@Override
-public void SocketStatus(GkashSoftPOSSDK.SocketConnectivityCallback connectivityCallback) {
-    runOnUiThread(() -> {
-        socketStatusTV.setText(connectivityCallback.name());
+    @Override
+    public void SocketStatus(GkashSoftPOSSDK.SocketConnectivityCallback connectivityCallback) {
+        runOnUiThread(() -> {
+            socketStatusTV.setText(connectivityCallback.name());
 
-        if(connectivityCallback == GkashSoftPOSSDK.SocketConnectivityCallback.ONLINE){
-            ipAddressTV.setText("IP address: " + gkashSoftPOSSDK.getIpAddress());
-        }
-    });
-}
+            if(connectivityCallback == GkashSoftPOSSDK.SocketConnectivityCallback.ONLINE){
+                ipAddressTV.setText("IP address: " + gkashSoftPOSSDK.getIpAddress());
+            }
+        });
+    }
 
-@Override
-public void TransactionEvent(GkashSoftPOSSDK.TransactionEventCallback transactionEventCallback) {
-    runOnUiThread(() -> transactionEventTV.setText(transactionEventCallback.name()));
-}
+    @Override
+    public void TransactionEvent(GkashSoftPOSSDK.TransactionEventCallback transactionEventCallback) {
+        runOnUiThread(() -> transactionEventTV.setText(transactionEventCallback.name()));
+    }
 
-@Override
-public void QueryTransactionResult(TransactionDetails details) {
+    @Override
+    public void QueryTransactionResult(TransactionDetails details) {
         //Handle transaction result
         Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
         intent.putExtra("Status", details.getStatus());
@@ -107,7 +111,8 @@ public void QueryTransactionResult(TransactionDetails details) {
         intent.putExtra("TxType", details.getTxType());
         intent.putExtra("CartId", details.getCartID());
         startActivity(intent);
-}
+    }
+});
 
 //send payment request to softpos
 requestPaymentBtn.setOnClickListener(view -> {
@@ -141,19 +146,17 @@ public void onClick(View view) {
     }
 });
 ```
-After requested for permission, implement onRequestPermissionsResult to obtain the permission status.
-
+After called importGkashCert function and choose the pfx file from your folder, implement onActivityResult to get the URI of the pfx file.
+Then call setGkashCertUri(uri) function from gkash sdk to import the pfx file.
+Note: You do not need to add this function when you set .setLoadCertFromAsset(true) to GkashSDKConfig;
 ```Java
 @Override
-public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    if (requestCode == 10001) {
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        // Permission is granted
-        // Do the operation that requires this permission
-        } else {
-        // Permission is not granted
-        // Display a message to the user explaining why the permission is needed
+public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+    super.onActivityResult(requestCode, resultCode, resultData);
+    if (requestCode == 10001 && resultCode == Activity.RESULT_OK) {
+        if (resultData != null) {
+            Uri uri = resultData.getData();
+            gkashSoftPOSSDK.setGkashCertUri(uri);
         }
     }
 }
