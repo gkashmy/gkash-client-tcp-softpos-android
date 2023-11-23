@@ -147,8 +147,8 @@ public void onClick(View view) {
 });
 ```
 After called importGkashCert function and choose the pfx file from your folder, implement onActivityResult to get the URI of the pfx file.
-Then call setGkashCertUri(uri) function from gkash sdk to import the pfx file.
-Note: You do not need to add this function when you set .setLoadCertFromAsset(true) to GkashSDKConfig;
+Then call setGkashCertUri(uri) function from gkash sdk to import the pfx file.\
+Note: You do not need to add this function when you set .setLoadCertFromAsset(true) to GkashSDKConfig.
 ```Java
 @Override
 public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
