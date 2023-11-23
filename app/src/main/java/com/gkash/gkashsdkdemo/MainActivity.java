@@ -17,8 +17,6 @@ import com.gkash.gkashsoftpossdk.model.GkashSDKConfig;
 import com.gkash.gkashsoftpossdk.model.PaymentRequestDto;
 import com.gkash.gkashsoftpossdk.model.TransactionDetails;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,11 +63,17 @@ public class MainActivity extends AppCompatActivity {
         CheckBox envCb = findViewById(R.id.envCB);
         envCb.setChecked(testingEnv);
 
+        //Get Gkash sdk current instance
+        gkashSoftPOSSDK = GkashSoftPOSSDK.getInstance(MainActivity.this);
+
         //Configure Config
         GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv);
-        //Get Gkash sdk current instance
-        gkashSoftPOSSDK = GkashSoftPOSSDK.getInstance();
-        //Request permission
+
+        // To use the pfx file in your project, include the pfx file in the asset folder
+        // GkashSDKConfig gkashSDKConfig = new GkashSDKConfig().setUsername(username).setPassword(password).setTestingEnvironment(testingEnv).setLoadCertFromAsset(true);
+
+        // Do not need to call this if you setLoadCertFromAsset(true)
+        // This function will navigate to your folder and choose the pfx file.
         gkashSoftPOSSDK.importGkashCert(MainActivity.this, 10001);
         //Initialize Gkash sdk
         gkashSoftPOSSDK.init(gkashSDKConfig, new GkashSoftPOSSDK.GkashStatusCallback() {
@@ -190,13 +194,14 @@ public class MainActivity extends AppCompatActivity {
         wechatBtn.setOnClickListener(view -> paymentTypeET.setText(GkashSoftPOSSDK.PaymentType.WECHAT_QR.name()));
     }
 
+    // Do not need to add this function if you set this config -> .setLoadCertFromAsset(true);
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
         if (requestCode == 10001 && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 Uri uri = resultData.getData();
-                gkashSoftPOSSDK.setGkashCertUri(uri, MainActivity.this);
+                gkashSoftPOSSDK.setGkashCertUri(uri);
             }
         }
     }
