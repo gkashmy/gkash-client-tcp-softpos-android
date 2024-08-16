@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         boolean testingEnv = intent.getBooleanExtra("env", true);
 
         Button requestPaymentBtn = findViewById(R.id.paymentBtn);
+        Button cancelBtn = findViewById(R.id.cancelBtn);
         Button tapToPhoneBtn = findViewById(R.id.tapBtn);
         Button cardBtn = findViewById(R.id.cardBtn);
         Button scanBtn = findViewById(R.id.scanBtn);
@@ -165,6 +166,10 @@ public class MainActivity extends AppCompatActivity {
 
             queryBtn.setEnabled(true);
             gkashSoftPOSSDK.requestPayment(requestDto);
+        });
+
+        cancelBtn.setOnClickListener(view -> {
+            gkashSoftPOSSDK.cancelPayment();
         });
 
         queryBtn.setOnClickListener(new View.OnClickListener() {

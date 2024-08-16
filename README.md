@@ -16,7 +16,7 @@ Include the library reference in the build.gradle file.
 
 ```Gradle
 dependencies {
-     implementation 'io.github.gkashmy:gkash-softpos-sdk:2.1.1'
+     implementation 'io.github.gkashmy:gkash-softpos-sdk:2.2.0'
 }
 ```
 Implement the library as follows. 
@@ -133,6 +133,11 @@ requestPaymentBtn.setOnClickListener(view -> {
     
     queryBtn.setEnabled(true);
     gkashSoftPOSSDK.requestPayment(requestDto);
+});
+
+//cancel payment
+cancelBtn.setOnClickListener(view -> {
+    gkashSoftPOSSDK.cancelPayment();
 });
 
 queryBtn.setOnClickListener(new View.OnClickListener() {

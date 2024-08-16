@@ -28,8 +28,8 @@ android {
 }
 
 dependencies {
-    implementation 'io.github.gkashmy:gkash-softpos-sdk:2.1.1'
-   // implementation project(path: ':app:GkashSoftPOSSDK')
+    implementation 'io.github.gkashmy:gkash-softpos-sdk:2.2.0'
+    //implementation project(path: ':GkashSoftPOSSDK')
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
