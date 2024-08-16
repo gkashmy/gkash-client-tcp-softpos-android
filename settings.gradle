@@ -14,4 +14,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "GkashSDKdemo"
 include ':app'
-include ':app:GkashSoftPOSSDK'
