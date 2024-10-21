@@ -16,7 +16,7 @@ Include the library reference in the build.gradle file.
 
 ```Gradle
 dependencies {
-     implementation 'io.github.gkashmy:gkash-softpos-sdk:2.2.0'
+     implementation 'io.github.gkashmy:gkash-softpos-sdk:2.2.1'
 }
 ```
 Implement the library as follows. 
